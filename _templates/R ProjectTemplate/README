@@ -1,0 +1,40 @@
+This project was created by the "ProjectTemplate" R package 2011-01-24
+http://www.johnmyleswhite.com/notebook/2010/08/26/projecttemplate/
+
+https://github.com/johnmyleswhite/ProjectTemplate#readme
+
+Default Project Layout
+Within your project directory, ProjectTemplate creates the following directories and files whose purpose is explained below:
+
+data/: Store your raw data files here. If they are a supported file format, they will automatically be loaded when you call load.project() or source('lib/boot.R'), for which 
+load.project() is essentially a mnemonic.
+
+diagnostics/: Store any scripts you use to diagnose your data sets for corruption or problematic data points. You should also put code that globally censors any data points here.
+
+doc/: Store documentation for your analysis here.
+
+graphs/: Store any graphs that you produce here.
+
+lib/: Store any files that provide useful functionality for your work, but do not constitute a statistical analysis per se here.
+
+lib/boot.R: This script handles automatically loading the other files in lib/ automatically. Calling load.project() automatically loads this file.
+
+lib/load_data.R: This script handles the automatic loading of any supported files contained in data/.
+
+lib/load_libraries.R: This script handles the automatic loading of the required packages, which are testthat, yaml and foreign. In addition, you can uncomment the lines that would automatically load the suggested packages, which are reshape, plyr, stringr, ggplot2 and log4r.
+
+lib/preprocess_data.R: This script handles the preprocessing of your data, if you need to add columns at run-time, merge normalized data sets or perform similar operations.
+
+lib/run_tests.R: This script automatically runs any test files contained in the tests/ directory using the testthat package. Calling run.tests() automatically runs this script.
+
+lib/utilities.R: This script should contain quick general purpose code that belongs in a package, but hasn't been packaged up yet.
+
+profiling/: Store any scripts you use to benchmark and time your code here.
+
+reports/: Store any output reports, such as HTML or LaTeX versions of tables here. Sweave or brew documents should also go here.
+
+tests/: Store any test cases in this directory. Your test files should use testthat style tests.
+
+README: Write notes to help orient newcomers to your project.
+
+TODO: Write a list of future improvements and bug fixes you have planned.

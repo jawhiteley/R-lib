@@ -1,0 +1,42 @@
+(1) `depends` seem to have some doubled rows, while the merging operations
+leave very few rows for `summary.statistics`. Decide how to handle this.
+
+(2) Want to make data set contain a row for every package: don't let isolation of package in graphs remove it from the system.
+
+(3) Get information about authors and enhances.
+
+(4) Get information about file size of raw package source, and other metlab metrics.
+
+(5) Models should at least look like this before the end:
+
+ExplicitRating ~ DependsRankRank + SuggestsPageRank + ImportsPageRank + ViewsIncluding + AuthorTotalPackages + PackageDownloads + AdjustedPackageDownloads + MetlabInfo
+
+(6) Consider getting Top 10 Lists from various community figures, then doing logistic regression on RecommendedPackage.
+
+(7) Think about adapting approach to other languages like Ruby, Python and Perl?
+
+(8) Clean up authors.csv files by auto-cleaning Authors entries.
+
+(9) Incorporate author's package count into predictive model.
+
+(10) Include reverse dependencies, suggests, imports.
+
+(11) Being at the end of chains of dependencies matters.
+
+(12) Consider log transforming some predictors
+
+(13) Give users top 25 packages, ask them to re-order them in a way they think is better.
+
+(14) Mean absolute error is already really lower (3%), but we want to cut down max absolute error, which is quite high (65%). May need better training set. May need different predictors.
+
+(15) Prizes: (a) best new predictor, (b) best improvement in mean error, (c) best improvement in max error.
+
+(16) Simply adding a Hadley indicator variable would increase the algorithm's performance enormously.
+
+(17) Count number of packages connected at all to current package, rather than immediate adjacencies.
+
+(18) Make a sortable table showing empirical probability and installed probability.
+
+(19) Use distance from DESCRIPTION release date as a predictor
+
+(20) Make a second pass through logit model; take into account that installed probability of a dependency must be at least installed probability of package that depends on it.

@@ -1,0 +1,116 @@
+R Code & file Organization
+
+Separate scripts from data files into folders, 
+or keep all together, with consistent naming between data & corresponding script?
+
+Treat SECC as one large project, or X separate by publication / Data units?
+  I can see the utility in a single, common "load" script that just loads & cleans all data from the entire experiment.  Once imported & standardized, merging & combining data would be much simpler.
+  Analysis scripts would then use portions of that data, as needed.
+  - Standardized generic script would only need to know which variable/column(s) to use, for example.
+  - specific scripts may still be necessary, for some specific considerations, such as which transformation to use, model validation, etc.
+  - Use functions to standardize the major steps to be used in each analysis: this will also make the main script shorter (albeit harder for someone else to follow)
+
+Separate script for each variable / analysis (for now), 
+  or eventually group all into one?
+
+================================================================================
+PROJECT FILE STRUCTURE
+  Based loosely on R Package "ProjectTemplate" by John Myles White, but simpler
+  http://www.johnmyleswhite.com/notebook/2010/08/26/projecttemplate/
+  
+  and other ideas:
+  http://stackoverflow.com/questions/3027476/ess-workflow-for-r-project-package-development/3031551#3031551
+
+[root]    R scripts for specific tasks: individual analyses, etc.
+            May depend on, or call generic scripts in /lib
+  /analysis
+            [root] only works if sorted by kind, otherwise the main folders will be interspersed with files :(  Main analysis files may instead be stored in a folder:
+             /_Main  /action  /analysis or /scripts
+/lib      General R script files (see below).  Functions, common tasks, etc.
+/data     Data files for analysis.  
+            Usually .csv or text-delimited files exported from other formats used to enter and manage raw data from an experiment or study.
+            Once complete, this folder can be locked (read-only) to avoid accidental damage.
+/graphs   Graphic output, .pdf or .eps
+/output   Output (not including graphics).
+            Console Output, tables, results summaries, etc. (text files)
+            Saved files produced by loading scripts (Data files that have been loaded & cleaned)
+
+[optional extras]
+/doc      Documentation, metadata
+/save     Saved files of objects produced by scripts
+            Data files that have been loaded & cleaned
+            .R files of object data.
+/_temp    Playground for experiments, trials, etc.
+/fun      Functions used in multiple projects.  Individual files of related functions.
+            This keeps the version of the function used with related script files, but makes it easy to copy them to other projects.
+
+
+
+================================================================================
+DATA FILES
+  .csv or text-delimited files (.txt)
+  These are typically exported from Excel, or other formats used for data entry & management 
+  (e.g. databases, etc.)
+file names:
+  Source/Experiment{-/}Variables[-Method][-subset].csv
+  SECC-Nfix-ARA-t1.csv
+
+
+================================================================================
+SCRIPT FILES    
+  in /lib folder (see FILE STRUCTURE above)
+
+  SECC - Variables - Analysis.R
+  SECC - Nfix~cb - GLMM.R
+
+
+  After Josh Reich's "LCFD" workflow
+    http://stackoverflow.com/questions/1429907/workflow-for-statistical-analysis-and-report-writing/1434424#1434424
+  See also the "ProjectTemplate" package in R to automate the creation, loading & execution of a project.
+
+0) _Main.R
+	Main Project script file.  Refers to other scripts via source() commands, in order.
+	The 'central command centre' to repeat the analyses.
+	~ optional.
+0.5)  init.R  boot.R
+      Initialize a project: run load/import & clean scripts, define functions, load data.
+      Gets project material ready for analysis.
+
+1*) load.R  import.R
+  Takes care of loading in all the data required. 
+  Typically this is a short file, reading in data from files, URLs and/or ODBC. 
+  Write out the workspace, or individul objects using save() 
+    (particularly large data sets that take a long time to load & process)
+    or just keep things in memory for the next steps.
+
+  1.1*) clean.R  prep.R
+    Pre-Processing Data.  This is where all the ugly stuff lives:
+    taking care of missing values, merging data frames, handling outliers.
+    * For small 'projects', I usually include this in 'load.R' above.
+
+2*) fun.R  fxn.R  func.R    utilities.R
+  Project-specific functions
+  Contains all of the functions needed to perform the actual analysis. 
+  source()-ing this file should have no side effects other than loading up the function definitions. 
+  This means that you can modify this file and reload it without having to go back
+  and repeat steps 1 & 2, which can take a long time to run for large data sets.
+  ~ optional: I also have a script of standard functions I use repeatedly for multiple analyses, which is source()'d within this file, but kept in a separate file, or folder.  It is preferable to copy any necessary functions to the project folder somewhere, to keep the same version with the project, so that the code will keep working, even if you update a newer version of the same functions later.
+
+3*) do.R  ana.R  analysis.R  eval.R  *.R
+  Calls the functions defined in func.R to perform the analysis and produce charts and tables.
+  * You could also source() other scripts in order of this workflow, making this the
+  'central command centre' to reproduce the analysis, for a small project without a 'main' script.
+  If load & clean steps are long and produce output files, load these intermediate files rather than source()'ing the scripts every time.
+  * This could instead be several related analyses within the same project in separate files.
+  Each one starts with source('./lib/init.R') or something similar to load necessary data, libraries, etc.
+  Multiple 'do.R' files can be run in a particular sequence from a global 'Main.R' script file, which also includes global initialization, housekeeping (clear memory before), etc.
+  
+  3.1) out.R  export.R  graphs.R  report.R
+    Produces output and graphs for reports & publications.
+      Use SWeave for repetitive reports, to embed data, R code, report text and TeX formatting in a single file / package.
+    
+) tests.R
+  Test cases (for functions / data?).
+  
+) profiling.R  performance.R
+  scripts to test speed of routines and R code.
