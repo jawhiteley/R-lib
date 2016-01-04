@@ -32,15 +32,14 @@ strip_empty_dims  <- function( data = NULL, dim = c(1, 2),
 	rows <-  1:nrow(data)
   }  
   
-  empty.rows <- which( apply( data[rows, check.cols], 1, function(x) all(is.na(x)) ) )
-  empty.cols <- which( apply( data[rows, check.cols], 2, function(x) all(is.na(x)) ) )
+  empty.rows <- rows[ which( apply( data[rows, check.cols], 1, function(x) all(is.na(x)) ) ) ]
+  empty.cols <- check.cols[ which( apply( data[rows, check.cols], 2, function(x) all(is.na(x)) ) ) ]
 
-  if (all(dim == 1)) {
+  if (any(dim == 1) & length(empty.rows) > 0 ) {
 	data <- data[-empty.rows, ]
-  } else if (all(dim == 2))  {
+  }
+  if (any(dim == 2) & length(empty.cols) > 0 )  {
 	data <- data[, -empty.cols]
-  } else if (all(dim %in% c(1, 2))) {
-	data <- data[-empty.rows, -empty.cols]
   }
   
   return(data)
