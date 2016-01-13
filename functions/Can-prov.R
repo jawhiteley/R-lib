@@ -2,8 +2,59 @@
 ### Province toolkit
 ### Goodies
 ### Tools for working with Canadian Provinces in data and graphs
-### Jonathan Whiteley		R v2.15.3		2014-10-09
+### Jonathan Whiteley		R v2.15.3		2015-01-13
 ################################################################
+## http://www.nrcan.gc.ca/earth-sciences/geography/place-names/useful-material-translators/9237
+
+## Full names, with sorting options
+prov_names <- function(lang="en", label="Canada", country.first=TRUE, sort.alpha=FALSE, ...)
+{
+  ## Default order: West-to-East, based on location of *capitals*, territories last.
+  provinces <- 
+    switch(lang,
+           en=c( # country
+                "British Columbia",
+                "Alberta",
+                "Saskatchewan",
+                "Manitoba",
+                "Ontario",
+                "Quebec",
+                "New Brunswick",
+                "Prince Edward Island",
+                "Nova Scotia",
+                "Newfoundland and Labrador",
+                "Yukon",  # "Yukon Territories" prior to 2003-04-01
+                "Northwest Territories",
+                "Nunavut"
+                ),
+           fr=c(
+                "Colombie-Britannique",
+                "Alberta",
+                "Saskatchewan",
+                "Manitoba",
+                "Ontario",
+                "Québec",
+                "Nouveau-Brunswick",
+                "Île-du-Prince-Édouard",
+                "Nouvelle-Écosse",
+                "Terre-Neuve-et-Labrador",
+                "Yukon",
+                "Territoires du Nord-Ouest",
+                "Nunavut"
+                )
+           )
+  if (sort.alpha) provinces <- sort(provinces, ...)
+  if (!is.na(country.first)) {
+    if (country.first) {
+      provinces <- c(label, provinces)
+    } else {
+      provinces <- c(provinces, label)
+    }
+  }
+  names(provinces) <- prov_codes(provinces, lang)
+  return(provinces)
+}
+
 ## Generating, or converting province codes
 prov_codes <- function(provs=NA, lang="en", ignore.case=TRUE, ...)
 {
