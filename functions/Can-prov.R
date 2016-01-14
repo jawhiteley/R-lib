@@ -2,45 +2,45 @@
 ### Province toolkit
 ### Goodies
 ### Tools for working with Canadian Provinces in data and graphs
-### Jonathan Whiteley		R v2.15.3		2015-01-13
+### Jonathan Whiteley		R v2.15.3		2015-01-14
 ################################################################
 ## http://www.nrcan.gc.ca/earth-sciences/geography/place-names/useful-material-translators/9237
 
-## Full names, with sorting options
-prov_names <- function(lang="en", label="Canada", country.first=TRUE, sort.alpha=FALSE, ...)
+## Full names of provinces, with sorting options
+prov_names <- function(lang="en", country.first=TRUE, sort.alpha=FALSE, label=c(CA="Canada"), ...)
 {
   ## Default order: West-to-East, based on location of *capitals*, territories last.
   provinces <- 
     switch(lang,
            en=c( # country
-                "British Columbia",
-                "Alberta",
-                "Saskatchewan",
-                "Manitoba",
-                "Ontario",
-                "Quebec",
-                "New Brunswick",
-                "Prince Edward Island",
-                "Nova Scotia",
-                "Newfoundland and Labrador",
-                "Yukon",  # "Yukon Territories" prior to 2003-04-01
-                "Northwest Territories",
-                "Nunavut"
+                BC="British Columbia",
+                AB="Alberta",
+                SK="Saskatchewan",
+                MB="Manitoba",
+                ON="Ontario",
+                QC="Quebec",
+                NB="New Brunswick",
+                PE="Prince Edward Island",
+                NS="Nova Scotia",
+                NL="Newfoundland and Labrador",
+                YT="Yukon",  # "Yukon Territories" prior to 2003-04-01
+                NT="Northwest Territories",
+                NU="Nunavut"
                 ),
            fr=c(
-                "Colombie-Britannique",
-                "Alberta",
-                "Saskatchewan",
-                "Manitoba",
-                "Ontario",
-                "Québec",
-                "Nouveau-Brunswick",
-                "Île-du-Prince-Édouard",
-                "Nouvelle-Écosse",
-                "Terre-Neuve-et-Labrador",
-                "Yukon",
-                "Territoires du Nord-Ouest",
-                "Nunavut"
+                BC="Colombie-Britannique",
+                AB="Alberta",
+                SK="Saskatchewan",
+                MB="Manitoba",
+                ON="Ontario",
+                QC="Québec",
+                NB="Nouveau-Brunswick",
+                PE="Île-du-Prince-Édouard",
+                NS="Nouvelle-Écosse",
+                NL="Terre-Neuve-et-Labrador",
+                YT="Yukon",
+                NT="Territoires du Nord-Ouest",
+                NU="Nunavut"
                 )
            )
   if (sort.alpha) provinces <- sort(provinces, ...)
@@ -51,35 +51,43 @@ prov_names <- function(lang="en", label="Canada", country.first=TRUE, sort.alpha
       provinces <- c(provinces, label)
     }
   }
-  names(provinces) <- prov_codes(provinces, lang)
   return(provinces)
 }
 
 ## Generating, or converting province codes
-prov_codes <- function(provs=NA, lang="en", ignore.case=TRUE, ...)
+##  This is fairly aggressive, so it should only be used on data that is expected to be some form of province labels.
+prov_codes <- function(provs=NA, lang="en", fuzzy=TRUE, ignore.case=TRUE, ...)
 {
-  if (all( is.na(provs) ))
+  if (all( is.na(provs) )) { ## standard codes, in (more-or-less) alphabetical order.
     prov.codes <- c("CA", "AB", "BC", "MB", "NB", "NL", "NS", "NT", "NU", "ON", "PE", "QC", "SK", "YT")
-  else
-  {
+  } else { ## regex to match appropriate codes.
     prov.codes <- provs
-    prov.codes <- sub("^TOTAL.*",        "CA", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Canad.*",        "CA", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Alberta.*",      "AB", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^British.*",      "BC", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Manitoba.*",     "MB", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^New\\s?Bruns.*", "NB", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Newf.*",         "NL", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Nova.*",         "NS", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^North.*",        "NT", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Ontari.*",       "ON", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Prince.*",       "PE", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Qu.*",           "QC", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Sask.*",         "SK", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Yukon.*",        "YT", prov.codes, ignore.case=ignore.case, ...)
-    prov.codes <- sub("^Nun.*",          "NU", prov.codes, ignore.case=ignore.case, ...)
+    prov.codes <- gsub("Le |The |Province| of | de ", "", prov.codes, ignore.case=ignore.case, ...)
+    prov.codes <- gsub("^\\s*|\\s*$", "", prov.codes) # trim leading and trailing spaces
+    if (fuzzy) { ## try fuzzy matching to full names first?
+      prov.matches <- lapply(prov.codes, agrep, prov_names(lang=lang), ignore.case=ignore.case, value=TRUE, ...)
+      prov.matches <- sapply(prov.matches, function (s) if (length(s)==1) s else NA)
+      if (!all(is.na(prov.matches)))
+        prov.codes[!is.na(prov.matches)] <- prov.matches[!is.na(prov.matches)]
+    }
+    ## regex to catch anything left
+    ##  these catch the most common variations I've seen, including things that agrep() won't match.
+    prov.codes <- sub(".*Canad.*|.*TOTAL.*"                               , "CA" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Al(b|ta).*"                                       , "AB" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub(".*Brit.*|^B[.-]*C.*|^C[.-]*B.*"                    , "BC" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Man.*"                                            , "MB" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^N(ew|ouv.*).?Bruns.*|^N[.-]*B.*"                  , "NB" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub(".*N(ewf.*|euv.*)|^N[.-]*L.*|^T[.-]*N[.-]*L.*"      , "NL" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Nov.*|Nouv.*coss.*|^N[.-]*S.*|^N[.-]*[EÉ].*"      , "NS" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^North.*|^N[.-]*W[.-]*T.*|^T[.-]*N[.-]*O.*"        , "NT" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Ont.*"                                            , "ON" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub(".*Prince.*|^P[.-]*E[.-]*I.*|[IÎ][.-]*P[.-]*[EÉ].*" , "PE" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Q(u|c).*"                                         , "QC" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Sask.*"                                           , "SK" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Y(uk|n).*|^Y[.-]*T.*"                             , "YT" , prov.codes , ignore.case=ignore.case , ...)
+    prov.codes <- sub("^Nun.*"                                            , "NU" , prov.codes , ignore.case=ignore.case , ...)
   }
-  prov.codes
+  return(prov.codes)
 }
 
 prov_factor <- function(provs=NULL, ...)
