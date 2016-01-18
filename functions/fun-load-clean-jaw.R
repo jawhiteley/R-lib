@@ -1,6 +1,6 @@
 ################################################################
 ### General R functions for loading and cleaning data
-### Jonathan A. Whiteley        R v3.2.2        2016-01-15
+### Jonathan A. Whiteley        R v3.2.2        2016-01-18
 ################################################################
 
 ################################################################
@@ -92,11 +92,15 @@ vlookup <- function(lookup_value="", table_array=data.frame(), col_index_num=2, 
   lookup.coords <- cbind(row=lookup.match, col=col_index_num)
   values <- apply(lookup.coords, 1, function (x)
                   {
-                    table_array[x['row'], x['col']]
+                    val <- table_array[x['row'], x['col']]
+                    if (is.null(val)) val <- NA
+                    if ("factor" %in% class(val)) val <- as.character(val)
+                    val
                   })
   return( values )
   if (FALSE) {                         # test code
-    vlookup( c(8:16, NA), data.frame(x=1:length(LETTERS), y=letters, z=LETTERS), rep(c(2, 3), length=length(c(8:16, NA))) )
+    vlookup( c(8:16, NA), data.frame(x=1:length(LETTERS), y=letters, z=LETTERS) )
+    vlookup( c(8:16, NA), data.frame(x=1:length(LETTERS), y=letters, z=LETTERS), rep(c(2, 3, NA), length=length(c(8:16, NA))) )
   }
 }
 
