@@ -172,33 +172,30 @@ picture_axis <- function (pics, icon.size = unit(1, "lines"), ...) {
 ##==============================================================
 ## Saving & Output functions (with defaults)
 
-save_ggplot <- function (plot=NULL, plot.data=TRUE, 
-                        file.names="plot", dir="./", file.type=c(".pdf", ".png"), 
-                        width=16, height=12, units="cm", scale=1, ...)
+save_ggplot <- function (plot=NULL, file.name="plot", dir="./", 
+                         data.plot=TRUE, format.ext=c(".pdf", ".png"), 
+                         width=16, height=12, units="cm", scale=1, ...)
 { ## Save ggplots to specified file types
-  for (type in file.type)
+  for (type in format.ext)
   {
-    ggsave(filename=paste(dir, file.names, type, sep=""), 
+    ggsave(filename=paste(dir, file.name, type, sep=""), 
            plot=plot, width=width, height=height, units=units, scale=scale, ... )
   }
   warning.message <- ""
-  if (is.null(plot.data))
-    plot.data <- FALSE
-  if ( !( "logical" %in% class(plot.data) || "data.frame" %in% class(plot.data) ) )
-  {
-    warning.message <- sprintf("Specified plot data is not a data frame (class: '%s'). ", class(plot.data))
-    plot.data <- FALSE
+  if (is.null(data.plot)) data.plot <- FALSE
+  if ( !( "logical" %in% class(data.plot) || "data.frame" %in% class(data.plot) ) ) {
+    warning.message <- sprintf("Specified plot data is not a data frame (class: '%s'). ", class(data.plot))
+    data.plot <- FALSE
   }
-  if ( "data.frame" %in% class(plot.data) )
-  {
+  if ( "data.frame" %in% class(data.plot) ) {
     ## Save associated data, manually specified.
-    write.csv(plot.data, paste(dir, file.names, ".csv", sep=""), row.names=FALSE)
-  } else if (plot.data==TRUE) { 
+    write.csv(data.plot, paste(dir, file.name, ".csv", sep=""), row.names=FALSE)
+  } else if (data.plot==TRUE) { 
     ## Save associated data, extracted from plot object.
-    write.csv(plot$data, paste(dir, file.names, ".csv", sep=""), row.names=FALSE)
-  } else if (plot.data==FALSE) { 
+    write.csv(plot$data, paste(dir, file.name, ".csv", sep=""), row.names=FALSE)
+  } else if (data.plot==FALSE) { 
     ## Do not save plot data, with a warning
-    warning(sprintf("%sNo plot data saved for %s.", warning.message, file.names))
+    warning(sprintf("%sNo plot data saved for %s.", warning.message, file.name))
   }
 }
 
@@ -211,8 +208,8 @@ export_plots <- function(plot.data=FALSE, ...)
     if (plot.data)
       save_ggplot(get(plot.obj), file=plot.file, ... )
     else
-      save_ggplot(get(plot.obj), plot.data=get( sub("\\.plot", ".pdata", plot.obj) ),
-                 filename=plot.file, ... )
+      save_ggplot(get(plot.obj), data=get( sub("\\.plot", ".pdata", plot.obj) ),
+                 file=plot.file, ... )
   }
   cat("`.plot` objects saved!\n")
 }
