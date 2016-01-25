@@ -1,6 +1,6 @@
 ################################################################
 ### Useful plot and graphing functions
-### Jonathan Whiteley     R v3.2.2    2015-12-16
+### Jonathan Whiteley     R v3.2.2    2016-01-25
 ################################################################
 
 ##==============================================================
@@ -126,7 +126,7 @@ panel.lines2 <- function (x, y, col = par("col"), bg = NA, pch = par("pch"),
 
 
 ##================================================
-## GGPLOT2 custom options
+## ggplot2 custom options
 ##================================================
 library(grid)       # needed for unit() - why does ggplot not load `grid` automatically?
 
@@ -147,7 +147,7 @@ theme_jaw <- function(x)
                          theme(legend.key = element_rect(colour = NA), # remove rectangle from legend keys.
                               ## move axis tick labels closer to ticks
                               axis.ticks.length = unit(0.3, "lines"), 
-                              axis.ticks.margin = unit(0.3, "lines"),
+                              axis.text = element_text(margin=unit(0.3, "lines")),
                               ## move axis labels away from axis text :/
                               axis.title.x = element_text(vjust=0, hjust=0.55),
                               axis.title.y = element_text(vjust=0.3, hjust=0.5, angle = 90)
