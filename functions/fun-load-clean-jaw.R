@@ -1,6 +1,6 @@
 ################################################################
 ### General R functions for loading and cleaning data
-### Jonathan A. Whiteley        R v3.2.2        2016-01-18
+### Jonathan A. Whiteley        R v3.2.2        2016-02-05
 ################################################################
 
 ################################################################
@@ -87,8 +87,10 @@ reforder <- function(vec="", ref="", drop.=FALSE, ...)
 vlookup <- function(lookup_value="", table_array=data.frame(), col_index_num=2, col_lookup=1)
 { ## mimick Excel's vlookup function, for use in calculating values based on lookup tables.
   lookup.match <- match(lookup_value, table_array[[col_lookup]])
+  if ("character" %in% class(col_index_num)) 
+    col_index_num <- match(col_index_num, colnames(table_array))
   ## Extract values from a combination r,c coordinate pairs.
-  ## I feel like theres a faster and simpler vectorized way to do this (and that I've done it before), but this is the best I could come up with.
+  ## I feel like there should be a faster and simpler vectorized way to do this (and that I've done it before), but this is the best I could come up with.
   lookup.coords <- cbind(row=lookup.match, col=col_index_num)
   values <- apply(lookup.coords, 1, function (x)
                   {
