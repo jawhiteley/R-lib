@@ -92,7 +92,8 @@ p == round( exp(log(1+p)) -1, 17)       # but they are small ;)
 ## www.kenbenoit.net/courses/ME104/logmodels2.pdf
 ## https://www.cscu.cornell.edu/news/statnews/stnews83.pdf
 
-## Gelman & Hill (2007) point out that they prefer natural logs because of the ease of interpreting coefficients (pg. 60-61), but also point out that log10 makes the transformed *values* a little easier to interpret, but the coefficients less easily interpreted. So, it's a bit of a trade-off.
+## Gelman & Hill (2007) point out that they prefer natural logs because of the ease of interpreting coefficients (pg. 60-61), but also point out that log10 makes the transformed *values* a little easier to interpret, but the coefficients harder to interpret.
+## So, it's a bit of a trade-off.
 
 
 
