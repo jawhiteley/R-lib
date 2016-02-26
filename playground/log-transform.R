@@ -92,6 +92,7 @@ p == round( exp(log(1+p)) -1, 17)       # but they are small ;)
 ## www.kenbenoit.net/courses/ME104/logmodels2.pdf
 ## https://www.cscu.cornell.edu/news/statnews/stnews83.pdf
 
+## Gelman & Hill (2007) point out that they prefer natural logs because of the ease of interpreting coefficients (pg. 60-61), but also point out that log10 makes the transformed *values* a little easier to interpret, but the coefficients less easily interpreted. So, it's a bit of a trade-off.
 
 
 
@@ -119,12 +120,12 @@ exp( mean(log(y)) )
 1 / (mean(1/y))
 
 ## http://www.jerrydallal.com/lhsp/logs.htm
-## Mathematicians like natural logs because they have properties that are not shared by other types of logarithms. For example, if you apply any logarithmic transformation to a set of data, the mean (average) of the logs is approximately equal to the log of the original mean, whatever type of logarithms you use. 
+## "Mathematicians like natural logs because they have properties that are not shared by other types of logarithms. For example, if you apply any logarithmic transformation to a set of data, the mean (average) of the logs is approximately equal to the log of the original mean, whatever type of logarithms you use. "
 mean(log(y))
 log(mean(y))                           # ~ 0
 mean(log10(y))
 log10(mean(y))                           # ~ 0
-## However, only for natural logs is the measure of spread called the standard deviation (SD) approximately equal to the coefficient of variation (the ratio of the SD to the mean) in the original scale.
+## "However, only for natural logs is the measure of spread called the standard deviation (SD) approximately equal to the coefficient of variation (the ratio of the SD to the mean) in the original scale."
 sd(log(y))
 sd(y) / mean(y)
 sd(log10(y))
