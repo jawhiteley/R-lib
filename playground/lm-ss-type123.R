@@ -1,11 +1,17 @@
 ################################################################
 ### lm Sums of Squares (SS): Type I, II, III
-### Jonathan Whiteley		R v3.2.2 		2016-03-01
+### Jonathan Whiteley		R v3.2.2 		2016-03-03
 ################################################################
 ### INITIALIZE
 rm(list=ls())	# clear memory
 
 data()
+
+## Contrasts
+## http://www.r-bloggers.com/using-and-interpreting-different-contrasts-in-linear-models-in-r/
+## see also contr.Sum and contr.Treatment in the car package, for better labels :)
+
+## Contrasts and Sums of Squares
 
 ## http://myowelt.blogspot.de/2008/05/obtaining-same-anova-results-in-r-as-in.html
 ## http://stats.stackexchange.com/questions/60362/choice-between-type-i-type-ii-or-type-iii-anova
