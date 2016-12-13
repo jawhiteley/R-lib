@@ -1,6 +1,6 @@
 ################################################################
 ### Useful plot and graphing functions
-### Jonathan Whiteley     R v3.2.2    2016-01-25
+### Jonathan Whiteley     R v3.2.2 / 3.3.2    2016-12-13
 ################################################################
 
 ##==============================================================
@@ -125,6 +125,11 @@ panel.lines2 <- function (x, y, col = par("col"), bg = NA, pch = par("pch"),
 }
 
 
+
+
+################################################################
+### ggplot2 goodies
+
 ##================================================
 ## ggplot2 custom options
 ##================================================
@@ -171,6 +176,41 @@ picture_axis <- function (pics, icon.size = unit(1, "lines"), ...) {
 
 ##==============================================================
 ## Saving & Output functions (with defaults)
+
+extract_plots <- function (class. = "ggplot", pattern = NULL, sort = TRUE, env. = .GlobalEnv)
+{
+  ## Create a list of bundled ggplot objects in the specified environment.
+  plots.ls <- eapply(env = env., function (obj)
+                     {
+                       if (class. %in% class(obj))
+                         return(TRUE)
+                       else
+                         return(FALSE)
+                     })
+  ##plots.ls <- unlist(plots.ls)
+  plots.ls <- plots.ls[unlist(plots.ls)]
+  ## apply a filter to names
+  if (!is.null(pattern))
+    plots.ls <- plots.ls[grepl(pattern, names(plots.ls))]
+  ## sort by names
+  if (isTRUE(sort))
+    plots.ls <- plots.ls[sort(names(plots.ls))]
+  ## extract the specified objects into a list
+  plots.ls <- sapply(names(plots.ls), function (name, plots.ls)
+                     {
+                       get(name, env = env.)
+                     }, simplify = FALSE, USE.NAMES = TRUE)
+  plots.ls
+}
+
+plots2pdf <- function (plots.ls = extract_plots(), dir. = "./", file. = "all_plots.pdf", ...)
+{
+  path.out <- paste0(dir., file.)
+  pdf(path.out, ...)
+  invisible(lapply(plots.ls, print))
+  invisible(dev.off())                 # returns name and number of new active device.
+}
+
 
 save_ggplot <- function (plot=NULL, file.name="plot", dir="./", 
                          data.plot=TRUE, format.ext=c(".pdf", ".png"), 
