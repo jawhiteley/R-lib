@@ -1,6 +1,6 @@
 ################################################################
 ### General R functions for loading and cleaning data
-### Jonathan A. Whiteley        R v3.2.2        2016-02-05
+### Jonathan A. Whiteley        R v3.2.2        2017-01-05
 ################################################################
 
 ################################################################
@@ -106,6 +106,21 @@ vlookup <- function(lookup_value="", table_array=data.frame(), col_index_num=2, 
   }
 }
 
+## Carry forward last observation to replace NA ('na.locf')
+## http://stackoverflow.com/questions/7735647/replacing-nas-with-latest-non-na-value
+na_fill <- na_locf <- 
+  function (x)
+  {
+    l = !is.na(x)                      # non-empty values
+    i = which(l)[c(1, 1:sum(l))]       # indices of non-empty values, with the first repeated (in case the fist value is NA
+    i = i[cumsum(l) +1]                # produces repeated indices of non-empty values
+    x[i]
+  }
+
+if (F) {
+  na_fill(c("a", "b", NA, "c", NA, NA, NA, "d", NA))
+  na_fill(c(NA, NA, "a", "b", NA, "c", NA, NA, NA, "d", NA))
+}
 
 
 ##==============================================================
