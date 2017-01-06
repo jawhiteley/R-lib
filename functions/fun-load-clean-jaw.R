@@ -91,6 +91,7 @@ vlookup <- function(lookup_value="", table_array=data.frame(), col_index_num=2, 
     col_index_num <- match(col_index_num, colnames(table_array))
   ## Extract values from a combination r,c coordinate pairs.
   ## I feel like there should be a faster and simpler vectorized way to do this (and that I've done it before), but this is the best I could come up with.
+  ## mapply()?
   lookup.coords <- cbind(row=lookup.match, col=col_index_num)
   values <- apply(lookup.coords, 1, function (x)
                   {
@@ -108,6 +109,7 @@ vlookup <- function(lookup_value="", table_array=data.frame(), col_index_num=2, 
 
 ## Carry forward last observation to replace NA ('na.locf')
 ## http://stackoverflow.com/questions/7735647/replacing-nas-with-latest-non-na-value
+## see also tidyr::fill
 na_fill <- na_locf <- 
   function (x)
   {
