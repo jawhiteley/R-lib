@@ -1,6 +1,6 @@
 ################################################################
 ### General R functions for loading and cleaning data
-### Jonathan A. Whiteley        R v3.2.2        2017-01-05
+### Jonathan A. Whiteley        R v3.2.2        2017-01-31
 ################################################################
 
 ################################################################
@@ -178,4 +178,9 @@ if (FALSE) {    # Test code
 
 
 ##==============================================================
+## EXPORT / SAVE data
 
+save_csv <- function (.data, file = "", quote = TRUE, row.names = FALSE, ...)
+{   ## convenience wrapper with my own sensible defaults. I got tired of overwriting these manually.
+  write.csv(.data, file = file, quote = quote, row.names = row.names, ...)
+}
