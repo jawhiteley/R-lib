@@ -5,8 +5,8 @@
 ##################################################
 
 cleanVarName <- function(variable.name)
-{
-  # clean.var.name by John Myles White, package "ProjectTemplate"
+{ # clean.var.name by John Myles White, package "ProjectTemplate"
+  # see ?make.names instead
   variable.name <- gsub('_', '.', variable.name, perl = TRUE)
   variable.name <- gsub('-', '.', variable.name, perl = TRUE)
   variable.name <- gsub('\\s+', '.', variable.name, perl = TRUE)
