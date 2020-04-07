@@ -200,21 +200,21 @@ F	# short for "FALSE" (logical values)
 # It means R is still waiting for the end of the last command.  
 # For example:
 c(1,2,3)	# produces a vector with the three numbers in it,
-	# followed by a new > prompt.  The command finished.
+	        # followed by a new > prompt.  The command finished.
 # But:
 c( 1 , 2	# this line is incomplete: 
 			# R is still waiting for the closing brackets.  
-			# The prompts is now '+'
+			# The prompt is now '+'
 	, 3		# More arguments and commands, but still no ')'
 )			# R is now satisfied and executes the entire command.
 
 # Notice that this means that R commands and functions 
-# can be spread out with spaces, and across multiple line.  
+# can be spread out with spaces, and across multiple lines.  
 # This is extremely useful when writing scripts, to help 
 # make your commands and code easier to read and less overwhelming.
 # Complex expressions can be broken apart visually, 
 # to make them easier to read and understand for humans:
-# it makes no difference to R, however.
+# it makes no difference to R, though.
 
 # If you get stuck in the console with a + prompt,
 # and don't know how to get out of it, you can always press the
@@ -239,10 +239,10 @@ c("foo"))
 	# The problem is usually at the end of the text
 	# in the second pair of double-quotes.
 	# This is often unpaired parentheses ())
-2a <- c(""foo")"
+2a <- c("foo")
 # Error: unexpected symbol in "..."
 	# R encountered a character it does not recognize.
-		# The second pair of double quotes shows you where the problem is:
+		# The text in double quotes shows you where the problem is:
 		# if it only contains part of an expression, 
 		# the problem is somewhere near the end of this section, 
 		# not after it.
@@ -264,7 +264,7 @@ c("foo"))
 
 
 # A little housekeeping: 
-rm(list-ls())	
+rm(list=ls())	
 	# This removes all objects in R's memory 
 	# (like wiping the slate clean), 
 	# and removes everything the above scripts has done.  
