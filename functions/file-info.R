@@ -21,9 +21,21 @@ if (F) {
   system('powershell -command "Get-Acl -Path \"~\""', intern = TRUE)
   system('powershell -command "Get-Acl -Path \"~\" | Format-List"', intern = TRUE)
   system('powershell -command "Get-Item -Path \"~\" | Format-List -Property * -Force"', intern = TRUE)
-  test_path <- normalizePath("~/My Pictures")
+  
+  # Spaces in the path
+  test_path <- normalizePath("~/My Pictures")  # this does not actually exist, as far as PowerShell is concerned - it is some sort of shortcut.
+  test_path <- tempfile("test file ", fileext = ".txt") |> normalizePath()
+  file.create(test_path)
+  system(paste0('powershell -command "Get-Acl -Path \"', test_path, '\" | Format-List"'), intern = TRUE) # error
   system(paste0('powershell -command "Get-Acl -Path \'', test_path, '\' | Format-List"'), intern = TRUE)
-  system(paste0('powershell -command "Get-Item -Path \"', test_path, '\" | Format-List -Property * -Force"'), intern = TRUE)
+  system(paste0('powershell -command "Get-Item -Path \"', test_path, '\" | Format-List -Property * -Force"'), intern = TRUE) # error
+  system(paste0('powershell -command "Get-Item -Path \'', test_path, '\' | Format-List -Property * -Force"'), intern = TRUE)
+  result_status1 <- 
+    system(paste0('powershell -command "Get-Acl -Path \"', test_path, '\" | Format-List"'), intern = TRUE) # error
+  result_status0 <- 
+    system(paste0('powershell -command "Get-Acl -Path \'', test_path, '\' | Format-List"'), intern = TRUE)
+  attr(result_status1, "status")  # 1
+  attr(result_status0, "status")  # NULL
 }
 
 # Goal: write a function that combines results of `file.info()` and PowerShell
@@ -43,6 +55,9 @@ powershell_list2df <- function (txt, width = NA) {
   # helper function to parse output of "Get-Acl" PowerShell command
   # Assume "Format-List" for now (more detail)
   require(tidyverse)
+  # check if the result has a status of 1 and skip if it does
+  if (!is.null(attr(txt, "status")) && attr(txt, "status") > 0)
+    return()
   # remove empty lines, collapse into a single string for read_fwf()
   txt_clean <- txt[which(!txt == "")] |>
     paste(collapse = "\n")
@@ -92,6 +107,9 @@ file_info_win <- function (files) {
   )
   fowner <- lapply(facl, powershell_list2df) %>% 
     bind_rows()
+  # ensure the object is not empty, for joining later.
+  if (nrow(fowner) < 1)
+    fowner <- finfo["path"]
   # Get additional file properties from PowerShell
   fitems <- lapply(
     files,
@@ -101,20 +119,24 @@ file_info_win <- function (files) {
   )
   fprops <- lapply(fitems, powershell_list2df) %>% 
     bind_rows()
+  # ensure the object is not empty, for joining later.
+  if (nrow(fprops) < 1)
+    fprops <- finfo["path"]
   # combine results, joining on the *normalized* path of each file.
+  # browser()
   file_props <- 
     finfo %>% 
     mutate(path = normalizePath(path)) %>% 
     left_join(
-      fowner %>% rename(path = Path) %>% 
+      fowner %>% rename(path = any_of("Path")) %>% 
         mutate(path = normalizePath(path)),
       by = "path"
     ) %>% 
     left_join(
-      fprops %>% rename(path = PSPath) %>% 
+      fprops %>% rename(path = any_of("PSPath")) %>% 
         mutate(path = normalizePath(path)),
       by = "path"
-    )
+    ) 
   return(file_props)
 }
 
@@ -124,7 +146,7 @@ file_info_win <- function (files) {
 library(testthat)
 
 test_that("Returned data frame contains information in file.info()", {
-  testfile <- tempfile("test", fileext = "")
+  testfile <- tempfile("test", fileext = ".txt")
   cat("test file\n", Sys.time(), file = testfile)
   file_info_base <- file.info(testfile)
   file_info_test <- file_info_win(testfile)
@@ -136,11 +158,28 @@ test_that("Returned data frame contains information in file.info()", {
 })
 
 test_that("No errors for a list of files", {
-  expect_no_error( file_info_win(dir("~")) )
+  testfile_list <- c(
+    tempfile("test", fileext = ".txt"),
+    tempfile("test2", fileext = ".txt")
+  )
+  file.create(testfile_list)
+  expect_no_error( file_info_win(testfile_list) )
 })
+
+test_that("No errors for paths with spaces", {
+  testfile <- tempfile("test file ", fileext = ".txt")
+  file.create(testfile)
+  expect_no_error( suppressWarnings(file_info_win(testfile)) )
+})
+
+test_that("No errors for paths that don't exist", {
+  testfile <- tempfile("test", fileext = ".txt")
+  expect_no_error( suppressWarnings(file_info_win(testfile)) )
+})
+
 
 if (F) {
   # lots of warnings related to PowerShell errors 
-  # and different results for items (directories) with spaces in the name.
+  # and different results for items (directories) that don't actually exist (e.g., "My Pictures")
   file_info_home <- file_info_win(dir("~"))
 }
