@@ -36,6 +36,10 @@ if (F) {
     system(paste0('powershell -command "Get-Acl -Path \'', test_path, '\' | Format-List"'), intern = TRUE)
   attr(result_status1, "status")  # 1
   attr(result_status0, "status")  # NULL
+  
+  # Recursive operation
+  system(paste0('powershell -command "Get-ChildItem \'', tempdir(), '\' -recurse | ForEach-Object{Get-Acl $_.FullName}'), intern = TRUE)
+  system(paste0('powershell -command "Get-ChildItem \'', tempdir(), '\' -recurse | ForEach-Object{Get-Acl $_.FullName | Format-List}'), intern = TRUE)
 }
 
 # Goal: write a function that combines results of `file.info()` and PowerShell
@@ -58,9 +62,6 @@ powershell_list2df <- function (txt, width = NA) {
   # check if the result has a status of 1 and skip if it does
   if (!is.null(attr(txt, "status")) && attr(txt, "status") > 0)
     return()
-  # remove empty lines, collapse into a single string for read_fwf()
-  txt_clean <- txt[which(!txt == "")] |>
-    paste(collapse = "\n")
   # derive width of property names, if not specified
   if (is.null(width) || is.na(width)) {
     wfreq <- regexpr(":", txt) %>% table() %>% 
@@ -72,6 +73,9 @@ powershell_list2df <- function (txt, width = NA) {
       pull((.)) %>% 
       as.numeric()
   }
+  # remove empty lines, collapse into a single string for read_fwf()
+  txt_clean <- txt[which(!txt == "")] |>
+    paste(collapse = "\n")
   # read text as fixed-width table
   txt_df <- read_fwf(
     txt_clean, 
@@ -81,13 +85,22 @@ powershell_list2df <- function (txt, width = NA) {
     mutate(
       # strip trailing spaces and ":"
       property = str_replace(property, "\\s+\\:\\s*$", ""), #%>% tolower(),
-      # remove extranous path information added by PowerShell
-      value = str_replace(value, "Microsoft\\.PowerShell\\.Core\\\\FileSystem::", "")
+      # remove extraneous path information added by PowerShell
+      value = str_replace(value, "Microsoft\\.PowerShell\\.Core\\\\FileSystem::", ""),
+      # add an 'item' group [for summarize()] if the text contains results for multiple items
+      item = ifelse(property == unique(property)[1], 1, NA) %>% row_number()
     ) %>% 
-    fill(property, .direction = "down") %>% 
-    summarize(value = paste(value, collapse = "\n"), .by = property)
-  # pivot to a data frame with properties as columns & return result
-  pivot_wider(txt_df, names_from = property, values_from = value) %>% return()
+    fill(item, property, .direction = "down") %>% 
+    summarize(value = paste(value, collapse = "\n"), .by = c(item, property))
+  # pivot to a data frame with properties as columns & clean long paths
+  df_wide <- txt_df %>% 
+    pivot_wider(names_from = property, values_from = value) %>% 
+    select(!item) %>% 
+    mutate(
+      # strip newlines from long paths that were wrapped in the original input
+      across(ends_with("Path"), ~ str_replace(., "\n", ""))
+    )
+  return(df_wide)
 }
 
 file_info_win <- function (files) {
@@ -177,9 +190,28 @@ test_that("No errors for paths that don't exist", {
   expect_no_error( suppressWarnings(file_info_win(testfile)) )
 })
 
+test_that("powershell_list2df() can handle multiple results", {
+  txt_multi <- 
+    system(
+      paste0('powershell -command "Get-ChildItem \'', 
+             tempdir(), 
+             '\' -recurse | ForEach-Object{Get-Acl $_.FullName | Format-List}'
+      ), 
+      intern = TRUE)
+  expect_no_error( powershell_list2df(txt_multi) )
+  txt_multi2 <- 
+    system(
+      paste0('powershell -command "Get-ChildItem \'', 
+             tempdir(), 
+             '\' -recurse | ForEach-Object{Get-Item $_.FullName | Format-List -Property * -Force}'
+      ), 
+      intern = TRUE)
+  expect_no_error( powershell_list2df(txt_multi2) )
+})
+
 
 if (F) {
   # lots of warnings related to PowerShell errors 
-  # and different results for items (directories) that don't actually exist (e.g., "My Pictures")
+  # for items (directories) that don't actually exist (e.g., "My Pictures")
   file_info_home <- file_info_win(dir("~"))
 }
