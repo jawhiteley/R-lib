@@ -1,7 +1,7 @@
 ################################################################
 ### File info in R
 ### 
-### Jonathan Whiteley       R v4.2.3        2024-07-17
+### Jonathan Whiteley       R v4.2.3        2024-07-18
 ################################################################
 
 # https://stackoverflow.com/questions/43349064/find-file-owner-in-r
@@ -56,8 +56,8 @@ if (F) {
 library(tidyverse)
 
 powershell_list2df <- function (txt, width = NA) {
-  # helper function to parse output of "Get-Acl" PowerShell command
-  # Assume "Format-List" for now (more detail)
+  # Helper function to parse output of "Get-" PowerShell commands
+  # assume "Format-List" for now (more detail)
   require(tidyverse)
   # check if the result has a status of 1 and skip if it does
   if (!is.null(attr(txt, "status")) && attr(txt, "status") > 0)
@@ -197,7 +197,8 @@ test_that("powershell_list2df() can handle multiple results", {
              tempdir(), 
              '\' -recurse | ForEach-Object{Get-Acl $_.FullName | Format-List}'
       ), 
-      intern = TRUE)
+      intern = TRUE
+    )
   expect_no_error( powershell_list2df(txt_multi) )
   txt_multi2 <- 
     system(
@@ -205,7 +206,8 @@ test_that("powershell_list2df() can handle multiple results", {
              tempdir(), 
              '\' -recurse | ForEach-Object{Get-Item $_.FullName | Format-List -Property * -Force}'
       ), 
-      intern = TRUE)
+      intern = TRUE
+    )
   expect_no_error( powershell_list2df(txt_multi2) )
 })
 
