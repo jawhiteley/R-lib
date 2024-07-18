@@ -19,7 +19,11 @@ if (F) {
   # defaults to working directory
   system('powershell -command "Get-Acl"', intern = TRUE)
   system('powershell -command "Get-Acl -Path \"~\""', intern = TRUE)
+  system('powershell -command "Get-Acl -Path \"~\" | Format-List"', intern = TRUE)
   system('powershell -command "Get-Item -Path \"~\" | Format-List -Property * -Force"', intern = TRUE)
+  test_path <- normalizePath("~/My Pictures")
+  system(paste0('powershell -command "Get-Acl -Path \'', test_path, '\' | Format-List"'), intern = TRUE)
+  system(paste0('powershell -command "Get-Item -Path \"', test_path, '\" | Format-List -Property * -Force"'), intern = TRUE)
 }
 
 # Goal: write a function that combines results of `file.info()` and PowerShell
@@ -83,7 +87,7 @@ file_info_win <- function (files) {
   facl <- lapply(
     files,
     function (path) system(
-      paste0('powershell -command "Get-Acl -Path \"', path, '\" | Format-List"'), 
+      paste0('powershell -command "Get-Acl -Path \'', path, '\' | Format-List"'), 
       intern = TRUE)
   )
   fowner <- lapply(facl, powershell_list2df) %>% 
@@ -92,7 +96,7 @@ file_info_win <- function (files) {
   fitems <- lapply(
     files,
     function (path) system(
-      paste0('powershell -command "Get-Item -Path \"', path, '\" | Format-List -Property * -Force"'), 
+      paste0('powershell -command "Get-Item -Path \'', path, '\' | Format-List -Property * -Force"'), 
       intern = TRUE)
   )
   fprops <- lapply(fitems, powershell_list2df) %>% 
@@ -136,6 +140,7 @@ test_that("No errors for a list of files", {
 })
 
 if (F) {
-  # lots of warnings related to PowerShell errors and different results for directories
+  # lots of warnings related to PowerShell errors 
+  # and different results for items (directories) with spaces in the name.
   file_info_home <- file_info_win(dir("~"))
 }
