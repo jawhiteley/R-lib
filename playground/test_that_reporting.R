@@ -41,6 +41,7 @@ test_that("Warn+fail", {
 cat(test_results)
 
 if (F) { # run manually
+  # https://testthat.r-lib.org/reference/SummaryReporter.html
   test_file(this.path::this.path(), reporter = SummaryReporter$new())
   # ListReporter returns generic test results that could be parsed for a custom report
   # but it isn't accessible if the file is source()d directly, only if tests are run as below.
