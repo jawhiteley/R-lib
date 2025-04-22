@@ -48,8 +48,9 @@ if (F)
 log_open(tmpfile, logdir = FALSE)
 
 # Add contents to log file ====
-sep("Results")
+log_info("Results: first example", hide_notes = TRUE)
 results2df(ex_results) |> knitr::kable() |> put()
+log_info("Results: second example", hide_notes = TRUE)
 results2df(ex_results2, c("File", "Outcome")) |> put()
 
 sep("CODE")
