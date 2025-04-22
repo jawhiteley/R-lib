@@ -26,6 +26,16 @@ test_results <- c(
   test_that("True", {expect_true(TRUE)})
 )
 test_that("False", {expect_true(FALSE)})
+test_that("Multiple with extra args", {
+  # 'info' is printed on a separate line after message
+  expect_true(TRUE, info  = "Extra Information for success")
+  expect_true(FALSE, info = "Extra Information for failure")
+  # 'label' is included directly in the message (as the value)
+  expect_true(TRUE, label  = "Label Information for success")
+  expect_true(FALSE, label = "Label Information for failure")
+  # only `label` is reliably available in list output (as part of the message)
+  # - `info` is not included in a success message.
+})
 
 context("Check unit-testing condition reporting")
 test_that("Error", {stop("Force an error")})
@@ -42,10 +52,10 @@ cat(test_results)
 
 if (F) { # run manually
   # https://testthat.r-lib.org/reference/SummaryReporter.html
-  test_file(this.path::this.path(), reporter = SummaryReporter$new())
+  testthat::test_file(this.path::this.path(), reporter = SummaryReporter$new())
   # ListReporter returns generic test results that could be parsed for a custom report
   # but it isn't accessible if the file is source()d directly, only if tests are run as below.
-  results <- test_file(this.path::this.path(), reporter = ListReporter$new())
+  results <- testthat::test_file(this.path::this.path(), reporter = ListReporter$new())
 }
 
 # It's not clear how to me how to combine {testthat} tests with an output report from the same file. :/
