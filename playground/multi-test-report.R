@@ -1,4 +1,12 @@
+################################################################################
+# Mock-up of multiple related test results and reporting to a log file
+# e.g., validation tests on a list of files; need record of tests and results
+# Jonathan Whiteley                2025-04-21                R v4.5.0
+################################################################################
+# SETUP ####
 tmpfile <- tempfile("report", fileext = ".txt")
+if (F)
+  file.exists(tmpfile)
 
 # Assemble example vector of results (T/F) and names (e.g., file names)
 ex_names <- paste("test", 1:9, sep = "-")
@@ -14,7 +22,7 @@ names(ex_results2) <- ex_names
 # Function to convert named logical vector to table of PASS/FAIL
 results2df <- function (
     x, 
-    colnames = c("Test", "Outcome"), 
+    colnames = c("Name", "Outcome"), 
     t = "PASS", f = "**FAIL**", na = "--"
 ) {
   x_names <- names(x)
@@ -31,3 +39,6 @@ results2df(ex_results)
 results2df(ex_results) |> knitr::kable()
 results2df(ex_results2) |> knitr::kable()
 results2df(ex_results2, c("File", "Outcome"))
+
+if (F) # open folder with temp file
+  system(sprintf("open %s", dirname(tmpfile)))
