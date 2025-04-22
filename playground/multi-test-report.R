@@ -3,10 +3,8 @@
 # e.g., validation tests on a list of files; need record of tests and results
 # Jonathan Whiteley                2025-04-21                R v4.5.0
 ################################################################################
-# SETUP ####
-tmpfile <- tempfile("report", fileext = ".txt")
-if (F)
-  file.exists(tmpfile)
+
+# Generate example results ####
 
 # Assemble example vector of results (T/F) and names (e.g., file names)
 ex_names <- paste("test", 1:9, sep = "-")
@@ -40,5 +38,24 @@ results2df(ex_results) |> knitr::kable()
 results2df(ex_results2) |> knitr::kable()
 results2df(ex_results2, c("File", "Outcome"))
 
+# OUTPUT to log file ####
+library(logr)
+tmpfile <- tempfile("report", fileext = ".txt")
+if (F)
+  file.exists(tmpfile)
+
+# Open the log file ====
+log_open(tmpfile, logdir = FALSE)
+
+# Add contents to log file ====
+sep("Results")
+results2df(ex_results) |> knitr::kable() |> put()
+results2df(ex_results2, c("File", "Outcome")) |> put()
+
+sep("CODE")
+log_code()    # will include all code, at this spot in the log file (e.g., at the end) 
+
+# CLEAN UP ====
+log_close()
 if (F) # open folder with temp file
   system(sprintf("open %s", dirname(tmpfile)))
